@@ -1,0 +1,22 @@
+# Fichiers d'environnement Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environnements virtuels
+venv/
+.env/
+
+# Configurations d'outils
+*.vscode/
+.idea/
+
+# Fichiers de logs et temporaires
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Dépendances générées
+pip-log.txt
+pip-delete-this-directory.txt
