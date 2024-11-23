@@ -5,18 +5,15 @@ import asyncio
 import time
 from bleak import BleakClient, BleakScanner, BleakError
 from pushover import Client
-
-# Adresse MAC et UUID du capteur
-ADDRESS = "DB:67:08:4A:61:7B"
-HEART_RATE_CHARACTERISTIC_UUID = "00002a37-0000-1000-8000-00805f9b34fb"
+import config
 
 # Variables pour surveiller les données de fréquence cardiaque
 last_heart_rate = None
 last_update_time = time.time()
-HEART_RATE_TIMEOUT = 10  # Délai en secondes avant de considérer le capteur comme inactif
+HEART_RATE_TIMEOUT = config.HEART_RATE_TIMEOUT  # Délai en secondes avant de considérer le capteur comme inactif
 
 # Initialisation du client Pushover
-pushover_client = Client("uvc9zcenk1h8j9xerj3149y3r4d6zk", api_token="asqvw3iis265xioiehgf2udv9zhcwv")
+pushover_client = Client(config.PUSHOVER_USER_KEY, api_token=config.PUSHOVER_API_KEY)
 
 alert_sent = False  # Variable pour éviter les alertes répétées
 
@@ -38,7 +35,7 @@ def heart_rate_notification_handler(sender, data, ip_address):
             last_heart_rate = heart_rate
             last_update_time = current_time
             print(f"Fréquence cardiaque: {heart_rate} bpm")
-            export_heart_rate_to_influxdb(heart_rate, ADDRESS, ip_address)
+            export_heart_rate_to_influxdb(heart_rate, config.SENSOR_COOSPO_ADRESS, ip_address)
 
             # Annonce de la fréquence cardiaque si elle est supérieure à un seuil
             print('Heart Rate:', heart_rate)
@@ -64,17 +61,17 @@ async def connect_and_monitor_heart_rate(ip_address):
     while True:
         try:
             print("Recherche de l'appareil...")
-            device = await BleakScanner.find_device_by_address(ADDRESS, timeout=10.0)
+            device = await BleakScanner.find_device_by_address(config.SENSOR_COOSPO_ADRESS, timeout=10.0)
 
             if device:
-                print(f"Appareil trouvé. Tentative de connexion à {ADDRESS}")
+                print(f"Appareil trouvé. Tentative de connexion à {config.SENSOR_COOSPO_ADRESS}")
                 async with BleakClient(device, timeout=5.0) as client:
-                    print(f"Connecté à l'appareil : {ADDRESS}")
+                    print(f"Connecté à l'appareil : {config.SENSOR_COOSPO_ADRESS}")
                     asyncio.create_task(announceVocal("connecté"))
 
                     # Début des notifications
                     await client.start_notify(
-                        HEART_RATE_CHARACTERISTIC_UUID,
+                        config.HEART_RATE_CHARACTERISTIC_UUID_COOSPO,
                         lambda sender, data: heart_rate_notification_handler(sender, data, ip_address)
                     )
 

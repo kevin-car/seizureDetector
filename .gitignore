@@ -20,3 +20,6 @@ venv/
 # Dépendances générées
 pip-log.txt
 pip-delete-this-directory.txt
+
+#Les configss
+config.py
